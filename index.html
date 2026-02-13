@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Для тебя! ❤️</title>
+    <style>
+        body { 
+            text-align: center; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #fff0f5 0%, #ffe4e1 100%);
+            margin: 0;
+            overflow: hidden; /* Важно: запрещаем скролл */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            touch-action: none; /* Отключаем зум на телефонах */
+        }
+        
+        h1 { color: #ff4d6d; margin-bottom: 30px; transition: 0.5s; padding: 0 20px; }
+        
+        .container { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+        .buttons { display: flex; gap: 20px; position: relative; z-index: 10; align-items: center; height: 100px; }
+
+        button { 
+            padding: 15px 30px; 
+            font-size: 20px; /* Чуть крупнее шрифт */
+            font-weight: bold;
+            cursor: pointer; 
+            border-radius: 50px; 
+            border: none; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease; /* Плавное изменение всех свойств */
+            white-space: nowrap;
+        }
+
+        #yesBtn { background-color: #ff4d6d; color: white; z-index: 2; }
+        /* Убрали CSS-ховер увеличение, теперь оно управляется через JS */
+        #yesBtn:hover { background-color: #ff2a52; box-shadow: 0 6px 20px rgba(255, 77, 109, 0.4); }
+
+        #noBtn { background-color: #ffffff; color: #555; position: absolute; z-index: 1; }
+
+        /* Стиль для фото (появится в конце) */
+        #photo {
+            display: none;
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            border: 6px solid #ff4d6d;
+            object-fit: cover;
+            margin-top: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            animation: appear 1s ease-out;
+        }
+
+        @keyframes appear { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
+
+        /* Конфетти */
+        .heart-particle {
+            position: fixed;
+            color: #ff4d6d;
+            font-size: 20px;
+            user-select: none;
+            pointer-events: none;
+            z-index: 100;
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="mainContainer">
+        <h1 id="question">Будешь моей Валентинкой? ❤️</h1>
+        
+        <img id="photo" src="https://i.imgur.com/1X4Qr8E.jpg" alt="Мы">
+
+        <div class="buttons" id="btnGroup">
+            <button id="yesBtn" onclick="celebrate()">КОНЕЧНО, ДА! 😍</button>
+            <button id="noBtn" onmouseover="moveAndResize()" ontouchstart="moveAndResize()">НЕТ</button>
+        </div>
+    </div>
+
+    <audio id="loveMusic" loop>
+        <source src="" type="audio/mpeg">
+    </audio>
+
+    <script>
+        // Переменные для отслеживания размера кнопок
+        let yesScale = 1;
+        let noScale = 1;
+
+        // 1. Функция перемещения и изменения размеров
+        function moveAndResize() {
+            const noBtn = document.getElementById('noBtn');
+            const yesBtn = document.getElementById('yesBtn');
+
+            // --- Логика перемещения ---
+            // Ограничиваем область, чтобы кнопка не улетала за край экрана телефона
+            const maxX = window.innerWidth - noBtn.offsetWidth - 20;
+            const maxY = window.innerHeight - noBtn.offsetHeight - 20;
+            
+            const x = Math.random() * maxX;
+            const y = Math.random() * maxY;
+            
+            noBtn.style.position = 'fixed';
+            noBtn.style.left = x + 'px';
+            noBtn.style.top = y + 'px';
+
+            // --- Логика изменения размеров ---
+            
+            // Уменьшаем кнопку "НЕТ" (до предела 0.5)
+            if (noScale > 0.5) {
+                noScale -= 0.1;
+            }
+            noBtn.style.transform = `scale(${noScale})`;
+
+            // Увеличиваем кнопку "ДА" (растет быстрее)
+            yesScale += 0.2;
+            yesBtn.style.transform = `scale(${yesScale})`;
+        }
+
+        // 2. Функция празднования (нажатие ДА)
+        function celebrate() {
+            document.getElementById('question').innerHTML = "Ура! Я так и знал(а)! <br> Люблю тебя! 💖";
+            document.getElementById('btnGroup').style.display = 'none';
+            
+            const photo = document.getElementById('photo');
+            photo.style.display = 'block';
+
+            const music = document.getElementById('loveMusic');
+            // Пытаемся включить музыку. Если src пустой, ничего не произойдет.
+            if (music.querySelector('source').src) {
+                 music.play().catch(e => console.log("Музыка не включилась (браузер заблокировал):", e));
+            }
+           
+
+            // Запускаем салют из сердечек
+            setInterval(createHeart, 100);
+            setInterval(createHeart, 150); // Двойная порция для эффекта!
+        }
+
+        // 3. Создание сердечек
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('heart-particle');
+            // Массив разных эмодзи для разнообразия
+            const emojis = ['❤️', '💖', '🥰', '😍', '💕', '💘'];
+            heart.innerHTML = emojis[Math.floor(Math.random() * emojis.length)];
+            
+            heart.style.left = Math.random() * 100 + 'vw';
+            const duration = Math.random() * 3 + 2; // от 2 до 5 секунд
+            heart.style.animationDuration = duration + 's';
+            heart.style.fontSize = (Math.random() * 20 + 15) + 'px';
+            
+            document.body.appendChild(heart);
+
+            setTimeout(() => {
+                heart.remove();
+            }, duration * 1000);
+        }
+    </script>
+</body>
+</html>
