@@ -76,7 +76,7 @@
     <div class="container">
         <h1 id="question">Будешь моей Валентинкой? ❤️</h1>
         
-        <img id="photo" src="IMG_20220817_165447.jpg" alt="Мы">
+        <img id="photo" src="IMG_20220817_165447.jpg" alt="Мы">\
 
         <div class="buttons" id="btnGroup">
             <button id="yesBtn" onclick="celebrate()">КОНЕЧНО, ДА! 😍</button>
@@ -92,19 +92,53 @@
         let yesScale = 1;
         let noScale = 1;
 
-        function moveAndResize() {
+function moveAndResize() {
             const noBtn = document.getElementById('noBtn');
             const yesBtn = document.getElementById('yesBtn');
 
-            // При первом взаимодействии делаем кнопку "летающей"
             noBtn.style.position = 'fixed';
 
-            const maxX = window.innerWidth - noBtn.offsetWidth - 20;
-            const maxY = window.innerHeight - noBtn.offsetHeight - 20;
-            
-            noBtn.style.left = Math.random() * maxX + 'px';
-            noBtn.style.top = Math.random() * maxY + 'px';
+            let x, y;
+            let overlap = true;
 
+            // Получаем координаты и размеры кнопки "ДА"
+            const yesRect = yesBtn.getBoundingClientRect();
+            const padding = 20; // Дополнительный отступ вокруг кнопки "ДА"
+
+            // Пытаемся найти свободное место (максимум 20 попыток, чтобы не зависнуть)
+            for (let i = 0; i < 20; i++) {
+                const maxX = window.innerWidth - noBtn.offsetWidth - 20;
+                const maxY = window.innerHeight - noBtn.offsetHeight - 20;
+                
+                x = Math.random() * maxX;
+                y = Math.random() * maxY;
+
+                // Проверяем, перекрывает ли новая позиция "НЕТ" кнопку "ДА"
+                const noRect = {
+                    left: x,
+                    top: y,
+                    right: x + noBtn.offsetWidth,
+                    bottom: y + noBtn.offsetHeight
+                };
+
+                const isOverlapping = !(
+                    noRect.right < yesRect.left - padding || 
+                    noRect.left > yesRect.right + padding || 
+                    noRect.bottom < yesRect.top - padding || 
+                    noRect.top > yesRect.bottom + padding
+                );
+
+                if (!isOverlapping) {
+                    overlap = false;
+                    break; 
+                }
+            }
+
+            // Устанавливаем найденные координаты
+            noBtn.style.left = x + 'px';
+            noBtn.style.top = y + 'px';
+
+            // Изменение размеров
             if (noScale > 0.4) noScale -= 0.1;
             noBtn.style.transform = `scale(${noScale})`;
 
@@ -113,7 +147,7 @@
         }
 
         function celebrate() {
-            document.getElementById('question').innerHTML = "Ура! Я так и знал(а)! 💖";
+            document.getElementById('question').innerHTML = "Конечно будешь, куда ты денешься) 💖";
             document.getElementById('btnGroup').style.display = 'none';
             
             const photo = document.getElementById('photo');
